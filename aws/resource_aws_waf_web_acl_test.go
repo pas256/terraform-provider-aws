@@ -234,9 +234,10 @@ func TestAccAWSWafWebAcl_Rules(t *testing.T) {
 	resourceName := "aws_waf_web_acl.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t); testAccPreCheckAWSWaf(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckAWSWafWebAclDestroy,
+		PreCheck:            func() { testAccPreCheck(t); testAccPreCheckAWSWaf(t) },
+		Providers:           testAccProviders,
+		CheckDestroy:        testAccCheckAWSWafWebAclDestroy,
+		DisableBinaryDriver: true,
 		Steps: []resource.TestStep{
 			// Test creating with rule
 			{
