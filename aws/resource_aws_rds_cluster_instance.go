@@ -112,6 +112,12 @@ func resourceAwsRDSClusterInstance() *schema.Resource {
 				Computed: true,
 			},
 
+			"db_option_group_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+
 			// apply_immediately is used to determine when the update modifications
 			// take place.
 			// See http://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Overview.DBInstance.Modifying.html
@@ -237,6 +243,10 @@ func resourceAwsRDSClusterInstanceCreate(d *schema.ResourceData, meta interface{
 
 	if attr, ok := d.GetOk("db_parameter_group_name"); ok {
 		createOpts.DBParameterGroupName = aws.String(attr.(string))
+	}
+
+	if attr, ok := d.GetOk("db_option_group_name"); ok {
+		createOpts.DBOptionGroupName = aws.String(attr.(string))
 	}
 
 	if v, ok := d.GetOk("identifier"); ok {
@@ -461,6 +471,10 @@ func resourceAwsRDSClusterInstanceRead(d *schema.ResourceData, meta interface{})
 		d.Set("db_parameter_group_name", db.DBParameterGroups[0].DBParameterGroupName)
 	}
 
+	if len(db.DBOptionGroups) > 0 {
+		d.Set("db_option_group_name", db.DBOptionGroups[0].DBOptionGroupName)
+	}
+
 	tags, err := keyvaluetags.RdsListTags(conn, aws.StringValue(db.DBInstanceArn))
 	if err != nil {
 		return fmt.Errorf("error listing tags for RDS Cluster Instance (%s): %s", d.Id(), err)
@@ -483,6 +497,11 @@ func resourceAwsRDSClusterInstanceUpdate(d *schema.ResourceData, meta interface{
 
 	if d.HasChange("db_parameter_group_name") {
 		req.DBParameterGroupName = aws.String(d.Get("db_parameter_group_name").(string))
+		requestUpdate = true
+	}
+
+	if d.HasChange("db_option_group_name") {
+		req.DBOptionGroupName = aws.String(d.Get("db_option_group_name").(string))
 		requestUpdate = true
 	}
 
